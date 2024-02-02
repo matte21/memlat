@@ -84,6 +84,8 @@ int main(int argc, char* argv[])
     }
   }
 
+  free(buf);
+
   fprintf(stderr, "Done %d accesses...\n", accs);
 
   double avg_ovd = 0;
@@ -112,4 +114,8 @@ int main(int argc, char* argv[])
 
   for(i = avg_ov; i<histsize; i++)
     printf("%llu %.2f\n", i-avg_ov, (1000.0 * hist[i] / accs) / 10);
+
+  free(hist);
+
+  return 0;
 }
