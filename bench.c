@@ -113,14 +113,15 @@ int main(int argc, char* argv[])
 
   fprintf(stderr, "Done %d accesses...\n", accs);
 
-  u64 ov = 9999;
+  double ovd = 0;
   for(j=0;j<cycle;j++) {
     start = rdtsc_read();
     diff = rdtsc_read() - start;
-    if (diff<ov) ov = diff;
+    ovd += ((double)(diff - ovd))/((double)(j+1));
   }
-  fprintf(stderr, "Measurement overhead: %llu cycles\n", ov);
-  
+  u64 avg_ov = (u64) ovd;
+  fprintf(stderr, "Avg measurement overhead per access: %llu cycles\n", avg_ov);
+
 #if 0
   istart=0;
   iend = histsize-1;
@@ -134,11 +135,10 @@ int main(int argc, char* argv[])
   //if (istart<ov) istart = ov;
   //iend += 20;
   //if (iend>=histsize) iend = histsize-1;
-  
-  fprintf(stderr, "Dumping histogram [%llu;%llu] (res %d)\n",
-	  istart-ov, iend-ov, res);
+
+  fprintf(stderr, "Dumping histogram [%llu;%llu] (res %d)\n", istart-avg_ov, iend-avg_ov, res);
 
 
   for(i = istart;i<iend;i++)
-    printf("%llu %.2f\n", i-ov, 1000.0 * hist[i] / accs );
+    printf("%llu %.2f\n", i-avg_ov, 1000.0 * hist[i] / accs );
 }
