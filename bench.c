@@ -7,8 +7,6 @@
      __asm__ __volatile__("rdtsc" : "=a" (low), "=d" (high)); \
      __asm__ __volatile__("mfence" ::: "memory");
 
-
-
 typedef unsigned long long u64;
 
 static inline u64 rdtsc_read(void)
@@ -19,19 +17,17 @@ static inline u64 rdtsc_read(void)
 }
 
 int* hist;
-int histsize;
+int histsize = 400;
 
 int main(int argc, char* argv[])
 {
-  int maxhist = 10000;
   int bufsize = 1000000;
   int stride  = 984567;
   int maxaccs = 50;
   int rounds, cycle, bufentries;
   void **buf, **pos;
   int i, inext, j, accs = 0;
-  u64 diff, start, maxdiff;
-  int istart, iend, res = 0;
+  u64 diff, start;
 
   if (argc >1) bufsize = atoi(argv[1]) * 1000;
   if (argc >2) maxaccs = atoi(argv[2]);
@@ -66,26 +62,6 @@ int main(int argc, char* argv[])
 
   fprintf(stderr,"=> CycleLen %d\n", cycle);
 
-  maxdiff = 0;
-  for(i=0;i<2;i++) {
-    pos = buf;
-    for(j=0;j<cycle;j++) {
-      start = rdtsc_read();
-      pos = *pos;
-      diff = rdtsc_read() - start;
-      if (diff>maxhist) {
-        fprintf(stderr, "xxxxxxxxx found diff bigger than maxhist!\n");
-        return 1;
-      }
-      if (maxdiff < diff) maxdiff = diff;
-    }
-  }
-
-  res += (int)(pos-buf);
-
-  fprintf(stderr, "Max. CPU Cycles: %llu\n", maxdiff);
-
-  histsize = maxdiff + 100;
   hist = (int*) malloc( histsize * sizeof(int) );
   for(i = 0;i<histsize;i++)
     hist[i] = 0;
@@ -108,8 +84,6 @@ int main(int argc, char* argv[])
     }
   }
 
-  res += (int)(pos-buf);
-
   fprintf(stderr, "Done %d accesses...\n", accs);
 
   double avg_ovd = 0;
@@ -129,18 +103,13 @@ int main(int argc, char* argv[])
   u64 avg_ov = (u64) avg_ovd;
   fprintf(stderr, "measurement overhead per access: avg: %llu, max: %llu, min: %llu\n", avg_ov, max_ov, min_ov);
 
-#if 0
-  istart=0;
-  iend = histsize-1;
-#else
-  for(istart = 0;istart<histsize;istart++)
-    if (hist[istart] > accs/1000) break;
-  for(iend = histsize-1;iend>=0;iend--)
-    if (hist[iend] > accs/1000) break;
-#endif
+  u64 below_ov_accs = 0;
+  for(i = 0; i<avg_ov; i++)
+    below_ov_accs += hist[i];
+  fprintf(stderr, "Number of Accesses below the overhead: %llu (%.2f %%)\n", below_ov_accs, ((1000.0 * below_ov_accs)/accs)/10);
 
-  fprintf(stderr, "Dumping histogram [%llu;%llu] (res %d)\n", istart-avg_ov, iend-avg_ov, res);
+  fprintf(stderr, "Dumping histogram [%llu;%llu]\n", 0, histsize-avg_ov);
 
-  for(i = istart;i<iend;i++)
-    printf("%llu %.2f\n", i-avg_ov, 1000.0 * hist[i] / accs );
+  for(i = avg_ov; i<histsize; i++)
+    printf("%llu %.2f\n", i-avg_ov, (1000.0 * hist[i] / accs) / 10);
 }
