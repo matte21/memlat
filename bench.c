@@ -112,7 +112,26 @@ int main(int argc, char* argv[])
 
   fprintf(stderr, "Dumping histogram [%llu;%llu]\n", 0, histsize-avg_ov);
 
-  for(i = avg_ov; i<histsize; i++)
+  // Compute distribution.
+  u64 p50 = 0, p90 = 0, p95 = 0, p99 = 0;
+  u64 observations_seen_so_far = 0;
+  for (i = avg_ov; i<histsize; i++) {
+    observations_seen_so_far += hist[i];
+    if (p50 == 0 && observations_seen_so_far >= (accs * 0.5)) {
+      p50 = i;
+    }
+    if (p90 == 0 && observations_seen_so_far >= (accs * 0.9)) {
+      p90 = i;
+    }
+    if (p95 == 0 && observations_seen_so_far >= (accs * 0.95)) {
+      p95 = i;
+    }
+    if (p99 == 0 && observations_seen_so_far >= (accs * 0.99)) {
+      p99 = i;
+    }
+  }
+
+  for (i = avg_ov; i<histsize; i++)
     printf("%llu %.2f\n", i-avg_ov, (1000.0 * hist[i] / accs) / 10);
 
   free(hist);
