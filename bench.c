@@ -21,7 +21,7 @@ static inline u64 rdtsc_read(void)
 int* hist;
 int histsize;
 
-main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
   int maxhist = 10000;
   int bufsize = 1000000;
@@ -140,10 +140,10 @@ main(int argc, char* argv[])
   //iend += 20;
   //if (iend>=histsize) iend = histsize-1;
   
-  fprintf(stderr, "Dumping histogram [%d;%d] (res %d)\n",
+  fprintf(stderr, "Dumping histogram [%llu;%llu] (res %d)\n",
 	  istart-ov, iend-ov, res);
 
 
   for(i = istart;i<iend;i++)
-    printf("%d %.2f\n", i-ov, 1000.0 * hist[i] / accs );
+    printf("%llu %.2f\n", i-ov, 1000.0 * hist[i] / accs );
 }
