@@ -46,15 +46,14 @@ int main(int argc, char* argv[])
 	     " <stride>  Stride between accesses (def. huge for pseudo-random)\n", argv[0]);
      exit(1);
   }
-  
+
   bufentries = bufsize / sizeof(void*);
   buf = (void**) malloc( bufsize );
   for(i = 0;i<bufentries;i++)
     buf[i] = buf;
 
-  fprintf(stderr, "Buf at %p (size %d, entries %d), Stride %d.\n",
-	 buf, bufsize, bufentries, stride);
-  
+  fprintf(stderr, "Buf at %p (size %d, entries %d), Stride %d.\n", buf, bufsize, bufentries, stride);
+
   cycle = 0;
   i = 0;
   do {
@@ -132,12 +131,7 @@ int main(int argc, char* argv[])
     if (hist[iend] > accs/1000) break;
 #endif
 
-  //if (istart<ov) istart = ov;
-  //iend += 20;
-  //if (iend>=histsize) iend = histsize-1;
-
   fprintf(stderr, "Dumping histogram [%llu;%llu] (res %d)\n", istart-avg_ov, iend-avg_ov, res);
-
 
   for(i = istart;i<iend;i++)
     printf("%llu %.2f\n", i-avg_ov, 1000.0 * hist[i] / accs );
