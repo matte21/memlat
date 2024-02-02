@@ -112,14 +112,22 @@ int main(int argc, char* argv[])
 
   fprintf(stderr, "Done %d accesses...\n", accs);
 
-  double ovd = 0;
+  double avg_ovd = 0;
+  double max_ov = 0;
+  double min_ov = 10000000;
   for(j=0;j<cycle;j++) {
     start = rdtsc_read();
     diff = rdtsc_read() - start;
-    ovd += ((double)(diff - ovd))/((double)(j+1));
+    avg_ovd += ((double)(diff - avg_ovd))/((double)(j+1));
+    if (diff > max_ov) {
+      max_ov = diff;
+    }
+    if (diff < min_ov) {
+      min_ov = diff;
+    }
   }
-  u64 avg_ov = (u64) ovd;
-  fprintf(stderr, "Avg measurement overhead per access: %llu cycles\n", avg_ov);
+  u64 avg_ov = (u64) avg_ovd;
+  fprintf(stderr, "measurement overhead per access: avg: %llu, max: %llu, min: %llu\n", avg_ov, max_ov, min_ov);
 
 #if 0
   istart=0;
