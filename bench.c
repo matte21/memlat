@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "xxxxxxxxx found diff bigger than histsize!\n");
         return 1;
       }
-      hist[(diff/5)*5]++;
+      hist[diff]++;
       accs++;
     }
   }
