@@ -77,7 +77,10 @@ main(int argc, char* argv[])
       start = rdtsc_read();
       pos = *pos;
       diff = rdtsc_read() - start;
-      if (diff>maxhist) continue;
+      if (diff>maxhist) {
+        fprintf(stderr, "xxxxxxxxx found diff bigger than maxhist!\n");
+        return 1;
+      }
       if (maxdiff < diff) maxdiff = diff;
     }
   }
