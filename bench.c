@@ -30,11 +30,8 @@ int main(int argc, char* argv[])
   int rounds, cycle, bufentries;
   void **buf, **pos;
   int i, inext, j, accs = 0;
-  u64 ov, diff, start, maxdiff;
+  u64 diff, start, maxdiff;
   int istart, iend, res = 0;
-  void* dummyP;
-
-  dummyP = (void*) & dummyP;
 
   if (argc >1) bufsize = atoi(argv[1]) * 1000;
   if (argc >2) maxaccs = atoi(argv[2]);
@@ -116,11 +113,9 @@ int main(int argc, char* argv[])
 
   fprintf(stderr, "Done %d accesses...\n", accs);
 
-  ov = 9999;
-  pos = dummyP;
+  u64 ov = 9999;
   for(j=0;j<cycle;j++) {
     start = rdtsc_read();
-    //pos = *pos;
     diff = rdtsc_read() - start;
     if (diff<ov) ov = diff;
   }
