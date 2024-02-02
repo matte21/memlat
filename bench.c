@@ -103,7 +103,10 @@ main(int argc, char* argv[])
       start = rdtsc_read();
       pos = *pos;
       diff = rdtsc_read() - start;
-      if (diff>histsize) continue;
+      if (diff>histsize) {
+        fprintf(stderr, "xxxxxxxxx found diff bigger than histsize!\n");
+        return 1;
+      }
       hist[(diff/5)*5]++;
       accs++;
     }
