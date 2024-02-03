@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   int bufsize = 1000000;
   int stride  = 984567;
   int histsize = 400;
-  int maxaccs = 50;
+  u64 maxaccs = 50;
   int rounds, cycle, bufentries;
   void **buf, **pos;
   int i, inext, j, accs = 0;
@@ -125,6 +125,7 @@ int main(int argc, char* argv[])
   fprintf(stderr, "measurement overhead per access: avg: %llu, max: %llu, min: %llu\n", avg_ov, max_ov, min_ov);
 
   fprintf(stderr, "Running %d Iterations...\n",rounds);
+  diff = 0;
   for(i=0;i<rounds;i++) {
     pos = buf;
     for(j=0;j<cycle;j++) {
