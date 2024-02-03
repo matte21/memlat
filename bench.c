@@ -19,6 +19,33 @@ static inline u64 rdtsc_read(void)
 int* hist;
 int histsize = 400;
 
+typedef struct {
+  long long int p50, p90, p95, p99;
+} percentiles;
+
+// compute_percentiles assumes that all the computed percentiles do exist (i.e. it fails silently
+// if the input parameters are not consistent between them).
+percentiles compute_percentiles(int *hist, int overhead, int histsize, int accs) {
+  percentiles p = {-1, -1, -1, -1};
+  u64 accs_seen_so_far = 0;
+  for (int i = overhead; i < histsize; i++) {
+    accs_seen_so_far += hist[i];
+    if (p.p50 == -1 && accs_seen_so_far >= (accs * 0.5)) {
+      p.p50 = i - overhead;
+    }
+    if (p.p90 == -1 && accs_seen_so_far >= (accs * 0.9)) {
+      p.p90 = i - overhead;
+    }
+    if (p.p95 == -1 && accs_seen_so_far >= (accs * 0.95)) {
+      p.p95 = i - overhead;
+    }
+    if (p.p99 == -1 && accs_seen_so_far >= (accs * 0.99)) {
+      p.p99 = i - overhead;
+    }
+  }
+  return p;
+}
+
 int main(int argc, char* argv[])
 {
   int bufsize = 1000000;
@@ -112,24 +139,7 @@ int main(int argc, char* argv[])
 
   fprintf(stderr, "Dumping histogram [%llu;%llu]\n", 0, histsize-avg_ov);
 
-  // Compute distribution.
-  u64 p50 = 0, p90 = 0, p95 = 0, p99 = 0;
-  u64 observations_seen_so_far = 0;
-  for (i = avg_ov; i<histsize; i++) {
-    observations_seen_so_far += hist[i];
-    if (p50 == 0 && observations_seen_so_far >= (accs * 0.5)) {
-      p50 = i;
-    }
-    if (p90 == 0 && observations_seen_so_far >= (accs * 0.9)) {
-      p90 = i;
-    }
-    if (p95 == 0 && observations_seen_so_far >= (accs * 0.95)) {
-      p95 = i;
-    }
-    if (p99 == 0 && observations_seen_so_far >= (accs * 0.99)) {
-      p99 = i;
-    }
-  }
+  percentiles p = compute_percentiles(hist, avg_ov, histsize, accs);
 
   for (i = avg_ov; i<histsize; i++)
     printf("%llu %.2f\n", i-avg_ov, (1000.0 * hist[i] / accs) / 10);
