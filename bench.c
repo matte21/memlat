@@ -107,29 +107,9 @@ int main(int argc, char* argv[])
 
   rounds = (int)(1000000.0 * maxaccs / cycle + 0.5);
 
-  fprintf(stderr, "Running %d Iterations...\n",rounds);
-  for(i=0;i<rounds;i++) {
-    pos = buf;
-    for(j=0;j<cycle;j++) {
-      start = rdtsc_read();
-      pos = *pos;
-      diff = rdtsc_read() - start;
-      if (diff>histsize) {
-        fprintf(stderr, "xxxxxxxxx found diff bigger than histsize!\n");
-        return 1;
-      }
-      hist[diff]++;
-      accs++;
-    }
-  }
-
-  free(buf);
-
-  fprintf(stderr, "Done %d accesses...\n", accs);
-
   double avg_ovd = 0;
-  double max_ov = 0;
-  double min_ov = 10000000;
+  u64 max_ov = 0;
+  u64 min_ov = 10000000;
   for(j=0;j<cycle;j++) {
     start = rdtsc_read();
     diff = rdtsc_read() - start;
@@ -143,6 +123,26 @@ int main(int argc, char* argv[])
   }
   u64 avg_ov = (u64) avg_ovd;
   fprintf(stderr, "measurement overhead per access: avg: %llu, max: %llu, min: %llu\n", avg_ov, max_ov, min_ov);
+
+  fprintf(stderr, "Running %d Iterations...\n",rounds);
+  for(i=0;i<rounds;i++) {
+    pos = buf;
+    for(j=0;j<cycle;j++) {
+      start = rdtsc_read();
+      pos = *pos;
+      diff = rdtsc_read() - start;
+      if (diff>histsize) {
+        fprintf(stderr, "xxxxxxxxx found diff %llu bigger than histsize!\n", diff);
+        return 1;
+      }
+      hist[diff]++;
+      accs++;
+    }
+  }
+
+  free(buf);
+
+  fprintf(stderr, "Done %d accesses...\n", accs);
 
   u64 below_ov_accs = 0;
   for(i = 0; i<avg_ov; i++)
