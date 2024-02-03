@@ -25,20 +25,20 @@ typedef struct {
 // compute_percentiles assumes that all the computed percentiles do exist (i.e. it fails silently
 // if the input parameters are not consistent between them).
 percentiles compute_percentiles(int *hist, int overhead, int histsize, int accs) {
-  percentiles p = {-1, -1, -1, -1};
+  percentiles p = {-1000000, -1000000, -1000000, -1000000};
   u64 accs_seen_so_far = 0;
-  for (int i = overhead; i < histsize; i++) {
+  for (int i = 0; i < histsize; i++) {
     accs_seen_so_far += hist[i];
-    if (p.p50 == -1 && accs_seen_so_far >= (accs * 0.5)) {
+    if (p.p50 == -1000000 && accs_seen_so_far >= (accs * 0.5)) {
       p.p50 = i - overhead;
     }
-    if (p.p90 == -1 && accs_seen_so_far >= (accs * 0.9)) {
+    if (p.p90 == -1000000 && accs_seen_so_far >= (accs * 0.9)) {
       p.p90 = i - overhead;
     }
-    if (p.p95 == -1 && accs_seen_so_far >= (accs * 0.95)) {
+    if (p.p95 == -1000000 && accs_seen_so_far >= (accs * 0.95)) {
       p.p95 = i - overhead;
     }
-    if (p.p99 == -1 && accs_seen_so_far >= (accs * 0.99)) {
+    if (p.p99 == -1000000 && accs_seen_so_far >= (accs * 0.99)) {
       p.p99 = i - overhead;
     }
   }
@@ -139,12 +139,12 @@ int main(int argc, char* argv[])
     below_ov_accs += hist[i];
   fprintf(stderr, "Number of Accesses below the overhead: %llu (%.2f %%)\n", below_ov_accs, ((1000.0 * below_ov_accs)/accs)/10);
 
-  fprintf(stderr, "Dumping histogram [%llu;%llu]\n", 0, histsize-avg_ov);
+  fprintf(stderr, "Dumping histogram [%llu;%llu]\n", -avg_ov, histsize-avg_ov);
 
   percentiles p = compute_percentiles(hist, avg_ov, histsize, accs);
 
-  for (i = avg_ov; i<histsize; i++)
-    printf("%llu %.2f\n", i-avg_ov, (1000.0 * hist[i] / accs) / 10);
+  for (i = 0; i<histsize; i++)
+    printf("%llu %.2f\n", i-avg_ov, (1000.0 * hist[i] / (double) accs) / (double) 10);
 
   free(hist);
 
