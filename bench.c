@@ -17,7 +17,6 @@ static inline u64 rdtsc_read(void)
 }
 
 int* hist;
-int histsize = 400;
 
 typedef struct {
   long long int p50, p90, p95, p99;
@@ -50,6 +49,7 @@ int main(int argc, char* argv[])
 {
   int bufsize = 1000000;
   int stride  = 984567;
+  int histsize = 400;
   int maxaccs = 50;
   int rounds, cycle, bufentries;
   void **buf, **pos;
@@ -59,14 +59,16 @@ int main(int argc, char* argv[])
   if (argc >1) bufsize = atoi(argv[1]) * 1000;
   if (argc >2) maxaccs = atoi(argv[2]);
   if (argc >3) stride = atoi(argv[3]);
+  if (argc >4) histsize = atoi(argv[4]);
 
   if ((bufsize == 0) || (maxaccs == 0) || (stride == 0)) {
      fprintf(stderr,
 	     "Memlat: Histogram of access latencies from linked-list traversal.\n"
 	     "Usage: %s [<size> [<accs> [<stride>]]]\n\n"
-	     " <size>    Buffer size in K (def. 1000 for 1MB)\n"
-	     " <accs>    Maximal number of accesses done in Mio. (def. 50)\n"
-	     " <stride>  Stride between accesses (def. huge for pseudo-random)\n", argv[0]);
+	     " <size>     Buffer size in K (def. 1000 for 1MB)\n"
+	     " <accs>     Maximal number of accesses done in Mio. (def. 50)\n"
+	     " <stride>   Stride between accesses (def. huge for pseudo-random)\n"
+       " <histsize> Maximum number of Cycles that a memory access can have (def. 400)\n", argv[0]);
      exit(1);
   }
 
