@@ -45,6 +45,16 @@ percentiles compute_percentiles(int *hist, int overhead, int histsize, int accs)
   return p;
 }
 
+void print_results_csv(percentiles stats, u64 overhead, int *hist, int histsize, int accs) {
+  printf("p50,%llu\n", stats.p50);
+  printf("p90,%llu\n", stats.p90);
+  printf("p95,%llu\n", stats.p95);
+  printf("p99,%llu\n", stats.p99);
+  printf("avg measurement overhead,%llu\n\n", overhead);
+  for (int i = 0; i < histsize; i++)
+    printf("%llu, %.2f\n", i-overhead, (1000.0 * hist[i] / (double) accs) / (double) 10);
+}
+
 int main(int argc, char* argv[])
 {
   int bufsize = 1000000;
@@ -139,12 +149,11 @@ int main(int argc, char* argv[])
     below_ov_accs += hist[i];
   fprintf(stderr, "Number of Accesses below the overhead: %llu (%.2f %%)\n", below_ov_accs, ((1000.0 * below_ov_accs)/accs)/10);
 
-  fprintf(stderr, "Dumping histogram [%llu;%llu]\n", -avg_ov, histsize-avg_ov);
-
   percentiles p = compute_percentiles(hist, avg_ov, histsize, accs);
 
-  for (i = 0; i<histsize; i++)
-    printf("%llu %.2f\n", i-avg_ov, (1000.0 * hist[i] / (double) accs) / (double) 10);
+  fprintf(stderr, "Dumping histogram [%llu;%llu]\n", -avg_ov, histsize-avg_ov);
+
+  print_results_csv(p, avg_ov, hist, histsize, accs);
 
   free(hist);
 
